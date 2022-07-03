@@ -24,7 +24,7 @@ int main(void)
 
 	struct sockaddr_in serv_addr;
 	serv_addr.sin_family = AF_INET;
-	serv_addr.sin_port = htons(33456); // specified port number
+	serv_addr.sin_port = htons(0); // specified port number
 	serv_addr.sin_addr.s_addr = inet_addr("0.0.0.0");
 
 	// creating the bind function
@@ -36,15 +36,18 @@ int main(void)
 
 	int len = sizeof(serv_addr);
 	// bind()
-	/*
+
 	int br = bind(net_socket, (struct sockaddr *)&serv_addr, len);
 
 	// bind() function on success return 0 and on failure returns -1
-	if (br < 0) {
+	if (br < 0)
+	{
 		perror("bind failed");
-	} else {
+	}
+	else
+	{
 		perror("bind successful");
-	} */
+	}
 
 	// creating the listen function
 	int lr = listen(net_socket, 10);
