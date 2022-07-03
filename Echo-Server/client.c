@@ -14,17 +14,17 @@ int main(int argc, char *argv[]) {
 	if (net_socket < 0) {
 		perror("socket error");
 	} else {
-		printf("socket created");
+		printf("socket created\n");
 	}
 
-	struct sockaddr_in sv_addr;
+	struct sockaddr_in sv_addr, ca, sa;
 	sv_addr.sin_family = AF_INET;
 	sv_addr.sin_port = htons(atoi(argv[2]));
+	sv_addr.sin_addr.s_addr = inet_addr(argv[1]);
 
 	int len = sizeof(struct sockaddr_in);
 	int cr = connect(net_socket, (struct sockaddr *)&sv_addr, len);
 
-	struct sockaddr_in ca, sa;
 	if (cr < 0) {
 		perror("connection failed");
 	} else {
@@ -53,9 +53,9 @@ int main(int argc, char *argv[]) {
 		if (pr < 0) {
 			perror("failed");
 		} else if (pr == 0) {
-			printf("time out");
+			printf("time out.. no response\n");
 		} else {
-			if (fds[0].revents & POLLRDNORM) {
+			if (fgets(buffer, 200, stdin)!= NULL) {
 				n = read(fileno(stdin), buffer, 200);
 				if (n == 0) {
 					printf("user have completed");
