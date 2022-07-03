@@ -8,12 +8,16 @@
 #include <sys/select.h>
 #include <arpa/inet.h>
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
 	int net_socket = socket(AF_INET, SOCK_STREAM, 0);
 
-	if (net_socket < 0) {
+	if (net_socket < 0)
+	{
 		perror("socket error");
-	} else {
+	}
+	else
+	{
 		printf("socket created\n");
 	}
 
@@ -25,9 +29,12 @@ int main(int argc, char *argv[]) {
 	int len = sizeof(struct sockaddr_in);
 	int cr = connect(net_socket, (struct sockaddr *)&sv_addr, len);
 
-	if (cr < 0) {
+	if (cr < 0)
+	{
 		perror("connection failed");
-	} else {
+	}
+	else
+	{
 		len = sizeof(struct sockaddr_in);
 		getsockname(net_socket, (struct sockaddr *)&ca, &len);
 		printf("client ip: %s\n", inet_ntoa(ca.sin_addr));
@@ -43,41 +50,57 @@ int main(int argc, char *argv[]) {
 	char buffer[200];
 	struct pollfd fds[2];
 
-	while (1) {
+	while (1)
+	{
 		fds[0].fd = fileno(stdin);
 		fds[1].events = POLLRDNORM;
 		fds[1].fd = net_socket;
 		fds[1].events = POLLRDNORM;
 
 		pr = poll(fds, 2, -1);
-		if (pr < 0) {
+		if (pr < 0)
+		{
 			perror("failed");
-		} else if (pr == 0) {
+		}
+		else if (pr == 0)
+		{
 			printf("time out.. no response\n");
-		} else {
-			if (fgets(buffer, 200, stdin)!= NULL) {
-				n = read(fileno(stdin), buffer, 200);
-				if (n == 0) {
-					printf("user have completed");
-					break;
+		}
+		else
+		{
+			if (fds[0].revents & POLLRDNORM)
+			{
+				if (fgets(buffer, 200, stdin) != NULL)
+				{
+					n = read(fileno(stdin), buffer, 200);
+					if (n == 0)
+					{
+						printf("user have completed");
+						break;
+					}
+					buffer[n] = '\0';
+					n = write(net_socket, buffer, strlen(buffer));
 				}
-				buffer[n] = '\0';
-				n = write(net_socket, buffer, strlen(buffer));
 			}
 
-			if (fds[1].revents & POLLRDNORM) {
-				n = read(net_socket, buffer, 200);
-				if (n == 0) {
-					printf("message recieved from server..\n");
-					printf("server terminated the connection..\n");
-					break;
+			if (fds[1].revents & POLLRDNORM)
+			{
+				if (fgets(buffer, 200, stdin) != NULL)
+				{
+					n = read(net_socket, buffer, 200);
+					if (n == 0)
+					{
+						printf("message recieved from server..\n");
+						printf("server terminated the connection..\n");
+						break;
+					}
 				}
 				buffer[n] = '\0';
 				printf("sever reply: %s\n", buffer);
+				// write(net_socket, buffer, strlen(buffer));
 			}
 		}
 	}
 	close(net_socket);
 	return 0;
 }
-
