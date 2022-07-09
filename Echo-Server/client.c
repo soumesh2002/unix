@@ -70,30 +70,21 @@ int main(int argc, char *argv[])
 		{
 			if (fds[0].revents & POLLRDNORM)
 			{
-				if (fgets(buffer, 200, stdin) != NULL)
-				{
-					n = read(fileno(stdin), buffer, 200);
-					if (n == 0)
-					{
-						printf("user have completed");
-						break;
-					}
-					buffer[n] = '\0';
-					n = write(net_socket, buffer, strlen(buffer));
-				}
+				buffer[n] = '\0';
+				n = write(net_socket, buffer, strlen(buffer));
+
+				printf("user have completed");
+				break;
 			}
 
 			if (fds[1].revents & POLLRDNORM)
 			{
-				if (fgets(buffer, 200, stdin) != NULL)
+				n = read(net_socket, buffer, 200);
+				if (n == 0)
 				{
-					n = read(net_socket, buffer, 200);
-					if (n == 0)
-					{
-						printf("message recieved from server..\n");
-						printf("server terminated the connection..\n");
-						break;
-					}
+					printf("message recieved from server..\n");
+					printf("server terminated the connection..\n");
+					break;
 				}
 				buffer[n] = '\0';
 				printf("sever reply: %s\n", buffer);
